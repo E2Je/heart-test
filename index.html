@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>טיימר לבדיקה לאחר צנתור - יחידת הלב
-</title>
+  <title>טיימר פרוטוקול אחיות</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
     body {
@@ -75,6 +74,17 @@
       color: #fff;
       display: none;
     }
+    /* כפתור "המשך מ..." */
+    #continue-btn {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: #fff;
+    }
     /* עיצוב רשימת הסבבים - מיושר לימין */
     #rounds {
       margin-top: 30px;
@@ -92,8 +102,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>טיימר לבדיקה לאחר צנתור - יחידת הלב
-</h1>
+    <h1>טיימר פרוטוקול אחיות</h1>
     <div id="progress-bar">
       <div id="progress"></div>
     </div>
@@ -103,6 +112,7 @@
       <button id="pause-btn">השהה</button>
       <button id="reset-btn">אפס</button>
       <button id="checked-btn">בדקתי</button>
+      <button id="continue-btn">המשך מ...</button>
     </div>
     <div id="message"></div>
     <div id="rounds"></div>
@@ -159,6 +169,7 @@
     const messageDiv = document.getElementById("message");
     const alertSound = document.getElementById("alert-sound");
     const checkedBtn = document.getElementById("checked-btn");
+    const continueBtn = document.getElementById("continue-btn");
     const roundsDiv = document.getElementById("rounds");
 
     let isPaused = false;
@@ -170,7 +181,7 @@
       return (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
     }
 
-    // עדכון תצוגת הטיימר וסרגל ההתקדמות לפי הפרק הנוכחי
+    // עדכון תצוגת הטיימר וסרגל ההתקדמות עבור הפרק הנוכחי
     function updateDisplay() {
       timerDisplay.textContent = formatTime(remainingTime);
       const currentInterval = intervals[currentAlert];
@@ -271,6 +282,24 @@
       }
       updateDisplay();
       updateRoundsDisplay();
+    });
+
+    // פעולה לכפתור "המשך מ..."
+    continueBtn.addEventListener("click", function() {
+      let input = prompt("הכנס את מספר הסבב שממנו את/ה רוצה להמשיך:");
+      if (input !== null) {
+        let roundNumber = parseInt(input);
+        if (!isNaN(roundNumber) && roundNumber >= 1 && roundNumber <= roundsDescriptions.length) {
+          // עדכון לסבב המבוקש
+          currentAlert = roundNumber - 1;
+          remainingTime = intervals[currentAlert];
+          updateDisplay();
+          updateRoundsDisplay();
+          messageDiv.innerHTML = ""; // מנקה הודעות קודמות
+        } else {
+          alert("מספר סבב לא תקין. נא להזין ערך בין 1 ל-" + roundsDescriptions.length);
+        }
+      }
     });
 
     // מאזינים לכפתורים
