@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>טיימר לבדיקה לאחר צנתור - יחידת הלב</title>
+  <title>טיימר לבדיקה לאחר צנתור - יחידת הלב
+</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
     body {
@@ -62,7 +63,7 @@
       font-size: 18px;
       line-height: 1.5;
     }
-    /* סגנון לכפתור "בדקתי" - מוסתר כברירת מחדל */
+    /* כפתור "בדקתי" - מוסתר כברירת מחדל */
     #checked-btn {
       padding: 10px 20px;
       margin: 10px;
@@ -74,11 +75,25 @@
       color: #fff;
       display: none;
     }
+    /* עיצוב רשימת הסבבים - מיושר לימין */
+    #rounds {
+      margin-top: 30px;
+      text-align: right;
+      font-size: 16px;
+    }
+    #rounds p {
+      margin: 5px 0;
+    }
+    .completed {
+      color: green;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>טיימר לבדיקה לאחר צנתור - יחידת הלב</h1>
+    <h1>טיימר לבדיקה לאחר צנתור - יחידת הלב
+</h1>
     <div id="progress-bar">
       <div id="progress"></div>
     </div>
@@ -90,22 +105,37 @@
       <button id="checked-btn">בדקתי</button>
     </div>
     <div id="message"></div>
+    <div id="rounds"></div>
   </div>
 
-  <!-- קובץ קול להתראה (יש להניח קובץ בשם alert.mp3 באותה תיקייה) -->
+  <!-- קובץ קול להתראה - יש למקם את alert.mp3 באותה תיקייה או לעדכן את הנתיב -->
   <audio id="alert-sound" src="alert.mp3"></audio>
 
   <script>
-    // זמני הפרוטוקול בשניות:
-    // 0.5 דקות = 30, 2 דקות = 120, 5 דקות = 300, 10 דקות = 600, 30 דקות = 1800, 1 שעה = 3600, ואז 4 התראות של 1 שעה כל אחת.
+    // הגדרת זמני הפרוטוקול בשניות:
+    // 0.5 דקות = 30, 2 דקות = 120, 5 דקות = 300, 10 דקות = 600, 30 דקות = 1800, 1 שעה = 3600, ואז 4 התראות של שעה כל אחת.
     const intervals = [30, 120, 300, 600, 1800, 3600, 3600, 3600, 3600, 3600];
+    // תיאורי הסבבים בהתאמה
+    const roundsDescriptions = [
+      "חצי דקה",
+      "שתי דקות",
+      "חמש דקות",
+      "עשר דקות",
+      "שלושים דקות",
+      "שעה",
+      "שעה",
+      "שעה",
+      "שעה",
+      "שעה"
+    ];
+
     let currentAlert = 0;
     let timer = null;
     let remainingTime = intervals[currentAlert];
-    
-    // משתנה שמציין אם אנו מחכים ללחיצת "בדקתי"
+
+    // משתנה המציין אם אנו מחכים ללחיצת "בדקתי"
     let waitingForUser = false;
-    
+
     // מערך משפטי עידוד – 10 דוגמאות (ניתן להרחיב עד 30)
     const motivationalMessages = [
       "תודה רבה על הדאגה למטופלים!",
@@ -119,36 +149,50 @@
       "העבודה הקשה שלך מוערכת מאוד!",
       "המשך להיות האור בהמשך המשמרת!"
     ];
-    
+
     // טקסט ההוראות – טקסט סטנדרטי לכל שלב
     const alertInstructions = "בדוק את הדופק בקצה הגפה, בדוק את חום הגוף באזור, בדוק סימני דימום, בדוק נפיחות.";
-    
-    // הפניות לאלמנטים בדף:
+
+    // הפניות לאלמנטים בדף
     const timerDisplay = document.getElementById("timer-display");
     const progressBar = document.getElementById("progress");
     const messageDiv = document.getElementById("message");
     const alertSound = document.getElementById("alert-sound");
     const checkedBtn = document.getElementById("checked-btn");
-    
+    const roundsDiv = document.getElementById("rounds");
+
     let isPaused = false;
-    
-    // עיצוב הזמן בפורמט דקות:שניות
+
+    // פונקציה לעיצוב הזמן (פורמט דקות:שניות)
     function formatTime(seconds) {
       const mins = Math.floor(seconds / 60);
       const secs = seconds % 60;
       return (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
     }
-    
+
     // עדכון תצוגת הטיימר וסרגל ההתקדמות לפי הפרק הנוכחי
     function updateDisplay() {
       timerDisplay.textContent = formatTime(remainingTime);
-      // חישוב אחוז ההתקדמות של הפרק הנוכחי:
       const currentInterval = intervals[currentAlert];
       const progressPercent = ((currentInterval - remainingTime) / currentInterval) * 100;
       progressBar.style.width = progressPercent + "%";
     }
-    
-    // הפעלת התראה – נגן את הצליל והצג הודעה עם הוראות ובמשפט עידוד אקראי
+
+    // עדכון תצוגת הסבבים בתחתית, עם סימון ✓ לסבבים שהסתיימו וסימון "(נוכחי)" לסבב הפעיל
+    function updateRoundsDisplay() {
+      roundsDiv.innerHTML = "";
+      for (let i = 0; i < roundsDescriptions.length; i++) {
+        let roundText = `סבב ${i+1}: ${roundsDescriptions[i]}`;
+        if (i < currentAlert) {
+          roundText = `<span class="completed">✓ ${roundText}</span>`;
+        } else if (i === currentAlert) {
+          roundText = `<strong>${roundText} (נוכחי)</strong>`;
+        }
+        roundsDiv.innerHTML += `<p>${roundText}</p>`;
+      }
+    }
+
+    // הפעלת התראה – הפעלת הצליל והצגת הודעת הוראות עם משפט עידוד אקראי
     function playAlert() {
       if (alertSound) {
         alertSound.currentTime = 0;
@@ -160,8 +204,9 @@
       waitingForUser = true;
       isPaused = true;
       checkedBtn.style.display = "inline-block";
+      updateRoundsDisplay();
     }
-    
+
     // כל "טיק" של הטיימר
     function timerTick() {
       if (!isPaused) {
@@ -172,21 +217,22 @@
         }
       }
     }
-    
+
     // התחלת הטיימר
     function startTimer() {
       if (!timer) {
         timer = setInterval(timerTick, 1000);
       }
+      updateRoundsDisplay();
     }
-    
+
     // השהה/המשך
     function pauseTimer() {
       if (waitingForUser) return;
       isPaused = !isPaused;
       document.getElementById("pause-btn").textContent = isPaused ? "המשך" : "השהה";
     }
-    
+
     // איפוס הטיימר וההתקדמות
     function resetTimer() {
       clearInterval(timer);
@@ -203,8 +249,9 @@
         alertSound.pause();
         alertSound.currentTime = 0;
       }
+      updateRoundsDisplay();
     }
-    
+
     // פעולה לכפתור "בדקתי"
     checkedBtn.addEventListener("click", function() {
       if (alertSound) {
@@ -214,7 +261,7 @@
       checkedBtn.style.display = "none";
       waitingForUser = false;
       isPaused = false;
-      // מעבר לשלב הבא בפרוטוקול
+      // מעבר לסבב הבא
       currentAlert++;
       if (currentAlert < intervals.length) {
         remainingTime = intervals[currentAlert];
@@ -223,14 +270,17 @@
         messageDiv.innerHTML += "<p>סיימת את הפרוטוקול!</p>";
       }
       updateDisplay();
+      updateRoundsDisplay();
     });
-    
+
     // מאזינים לכפתורים
     document.getElementById("start-btn").addEventListener("click", startTimer);
     document.getElementById("pause-btn").addEventListener("click", pauseTimer);
     document.getElementById("reset-btn").addEventListener("click", resetTimer);
-    
+
+    // עדכון תצוגה ראשונית
     updateDisplay();
+    updateRoundsDisplay();
   </script>
 </body>
 </html>
