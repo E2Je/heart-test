@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>טיימר פרוטוקול אחיות</title>
+  <title>טיימר לבדיקה לאחר צנתור - יחידת הלב</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
     body {
@@ -44,6 +44,9 @@
       font-size: 32px;
       margin-bottom: 20px;
     }
+    .buttons {
+      margin-bottom: 10px;
+    }
     .buttons button {
       padding: 10px 20px;
       margin: 5px;
@@ -65,7 +68,7 @@
     /* כפתור "בדקתי" - מוסתר כברירת מחדל */
     #checked-btn {
       padding: 10px 20px;
-      margin: 10px;
+      margin: 5px;
       font-size: 16px;
       border: none;
       border-radius: 5px;
@@ -102,7 +105,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>טיימר פרוטוקול אחיות</h1>
+    <h1>טיימר לבדיקה לאחר צנתור - יחידת הלב</h1>
     <div id="progress-bar">
       <div id="progress"></div>
     </div>
@@ -193,7 +196,7 @@
     function updateRoundsDisplay() {
       roundsDiv.innerHTML = "";
       for (let i = 0; i < roundsDescriptions.length; i++) {
-        let roundText = `סבב ${i+1}: ${roundsDescriptions[i]}`;
+        let roundText = `סבב ${i + 1}: ${roundsDescriptions[i]}`;
         if (i < currentAlert) {
           roundText = `<span class="completed">✓ ${roundText}</span>`;
         } else if (i === currentAlert) {
